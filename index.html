@@ -6,72 +6,93 @@
 <title>System Breach...</title>
 
 <style>
-    body {
-        background: black;
-        color: #00ff00;
-        font-family: monospace;
-        padding: 20px;
-        overflow: hidden;
-    }
+body {
+    background: black;
+    color: #00ff00;
+    font-family: monospace;
+    padding: 20px;
+    overflow: hidden;
+}
 
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-    .log {
-        font-size: 14px;
-        margin: 6px 0;
-        animation: flicker 0.15s infinite;
-    }
+.log {
+    font-size: 14px;
+    margin: 6px 0;
+    animation: flicker 0.15s infinite;
+}
 
-    @keyframes flicker {
-        0% { opacity: 1; }
-        50% { opacity: 0.6; }
-        100% { opacity: 1; }
-    }
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
 
-    /* ===== الزوز ===== */
-    #final {
-        display: none;
-        text-align: center;
-        font-size: 60px;
-        color: red;
-        margin-top: 80px;
-        animation: zoom 0.4s ease-out forwards,
-                   shake 0.08s infinite,
-                   blink 0.15s infinite;
-    }
+/* ===== الزوز ===== */
+#final {
+    display: none;
+    text-align: center;
+    font-size: 65px;
+    color: red;
+    margin-top: 120px;
+    animation:
+        zoom 0.4s ease-out forwards,
+        shake 0.08s infinite,
+        blink 0.15s infinite;
+}
 
-    @keyframes zoom {
-        from { transform: scale(0.1); }
-        to { transform: scale(1.6); }
-    }
+@keyframes zoom {
+    from { transform: scale(0.1); }
+    to { transform: scale(1.6); }
+}
 
-    @keyframes shake {
-        0% { transform: translate(0,0); }
-        25% { transform: translate(-6px, 3px); }
-        50% { transform: translate(6px, -3px); }
-        75% { transform: translate(-6px, -3px); }
-        100% { transform: translate(6px, 3px); }
-    }
+@keyframes shake {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(-6px, 3px); }
+    50% { transform: translate(6px, -3px); }
+    75% { transform: translate(-6px, -3px); }
+    100% { transform: translate(6px, 3px); }
+}
 
-    @keyframes blink {
-        0% { opacity: 1; }
-        50% { opacity: 0; }
-        100% { opacity: 1; }
-    }
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* زر البداية */
+#start {
+    position: fixed;
+    inset: 0;
+    background: black;
+    color: red;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
+<div id="start">اضغط للاتصال بالجهاز 📱</div>
+
 <h2>📡 Connecting to mobile device...</h2>
 <div id="logs"></div>
 
-<div id="final">الزوز 😈</div>
+<div id="final">
+    الزوز 😈<br>
+    <span style="font-size:40px">في جهازك</span>
+</div>
 
 <script>
+const startBtn = document.getElementById("start");
+
 /* ===== صوت إنذار ===== */
 function playAlarm() {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -79,21 +100,20 @@ function playAlarm() {
     const gain = ctx.createGain();
 
     osc.type = "square";
-    gain.gain.value = 0.5;
+    gain.gain.value = 0.4;
 
     osc.connect(gain);
     gain.connect(ctx.destination);
 
-    osc.start();
-
     let t = ctx.currentTime;
-    osc.frequency.setValueAtTime(800, t);
-    osc.frequency.setValueAtTime(500, t + 0.2);
-    osc.frequency.setValueAtTime(900, t + 0.4);
-    osc.stop(t + 0.9);
+    osc.start(t);
+    osc.frequency.setValueAtTime(700, t);
+    osc.frequency.linearRampToValueAtTime(1200, t + 0.4);
+    osc.frequency.linearRampToValueAtTime(500, t + 0.8);
+    osc.stop(t + 1.2);
 }
 
-/* ===== لوجات الاختراق الوهمية ===== */
+/* ===== لوجات ===== */
 const logs = [
     "Initializing exploit framework...",
     "Bypassing Android security layer...",
@@ -106,29 +126,30 @@ const logs = [
     "⚠️ DEVICE FULLY COMPROMISED ⚠️"
 ];
 
-let i = 0;
-const logsDiv = document.getElementById("logs");
+startBtn.onclick = () => {
+    startBtn.remove(); // لازم تفاعل عشان الصوت
+    let i = 0;
+    const logsDiv = document.getElementById("logs");
 
-const interval = setInterval(() => {
-    if (i < logs.length) {
-        const line = document.createElement("div");
-        line.className = "log";
-        line.textContent = logs[i];
-        logsDiv.appendChild(line);
-        window.scrollTo(0, document.body.scrollHeight);
-        i++;
-    } else {
-        clearInterval(interval);
+    const interval = setInterval(() => {
+        if (i < logs.length) {
+            const line = document.createElement("div");
+            line.className = "log";
+            line.textContent = logs[i];
+            logsDiv.appendChild(line);
+            i++;
+        } else {
+            clearInterval(interval);
+            playAlarm();
 
-        playAlarm(); // خضة الصوت
-
-        setTimeout(() => {
-            document.body.innerHTML = "";
-            document.body.appendChild(document.getElementById("final"));
-            document.getElementById("final").style.display = "block";
-        }, 800);
-    }
-}, 650);
+            setTimeout(() => {
+                document.querySelector("h2").style.display = "none";
+                logsDiv.style.display = "none";
+                document.getElementById("final").style.display = "block";
+            }, 700);
+        }
+    }, 650);
+};
 </script>
 
 </body>
